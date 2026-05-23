@@ -13,6 +13,8 @@ export default defineNuxtConfig({
         '@tanstack/vue-table',
         '@vue/devtools-core',
         '@vue/devtools-kit',
+        '@tauri-apps/api/webviewWindow',
+        '@tauri-apps/api/window',
       ],
     },
   },

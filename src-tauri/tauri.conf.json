@@ -13,9 +13,12 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "tauri-setup",
+        "label": "main",
+        "title": "Radiology Hub",
         "width": 1600,
-        "height": 900
+        "height": 900,
+        "resizable": true,
+        "fullscreen": false
       }
     ],
     "security": {

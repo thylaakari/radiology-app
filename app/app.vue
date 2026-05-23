@@ -1,6 +1,7 @@
 <script setup>
 const { setTitle } = useMetaData()
-await callOnce(async () => {
+
+onMounted(async () => {
   await setTitle('')
 })
 </script>
