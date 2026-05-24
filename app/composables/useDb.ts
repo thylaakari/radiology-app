@@ -1,36 +1,14 @@
-import { createRxDatabase } from 'rxdb'
-import { getRxStorageDexie } from 'rxdb/plugins/storage-dexie'
-import { patientSchema, reportSchema } from '../db/schemas'
+import Dexie from 'dexie'
 
-let dbPromise: any = null
+class AppDatabase extends Dexie {
+  constructor() {
+    super('radiology-hub')
 
-async function initDB() {
-  const db = await createRxDatabase({
-    name: 'radiology_local_db',
-    storage: getRxStorageDexie(),
-  })
-
-  // Регистрируем обе коллекции одновременно
-  await db.addCollections({
-    patients: { schema: patientSchema },
-    reports: { schema: reportSchema },
-  })
-
-  return db
+    this.version(2).stores({
+      patients:
+        'id, shortName, firstName, middleName, lastName, birthDate, gender, createdAt, updatedAt, deleted',
+    })
+  }
 }
 
-export const useDb = () => {
-  if (!dbPromise) {
-    dbPromise = initDB()
-  }
-
-  const getCollections = async () => {
-    const db = await dbPromise
-    return {
-      patients: db.patients,
-      reports: db.reports,
-    }
-  }
-
-  return { getCollections }
-}
+export const db = new AppDatabase()

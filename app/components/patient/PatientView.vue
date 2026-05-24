@@ -1,17 +1,15 @@
 <script setup>
-const router = useRouter()
+import { patientSchema } from '~/composables/usePatient'
 
+const { savePatient } = usePatient()
+const router = useRouter()
 const patient = ref({
-  id: '4586',
-  shortName: '',
+  id: '',
   firstName: '',
   middleName: '',
   lastName: '',
-  birthDate: '',
+  birthDate: null,
   gender: 'M',
-  createdAt: '',
-  updatedAt: '',
-  deleted: false,
 })
 
 const genderOptions = [
@@ -20,17 +18,31 @@ const genderOptions = [
   { label: 'Не указан', value: 'U' },
 ]
 
-const { formatBirthDate, formatAge } = usePatient()
+const onSubmit = async (event) => {
+  const createdPatient = await savePatient(event.data)
 
-onMounted(async () => {
-  const fullname = `${patient.value.lastName} ${patient.value.firstName} ${patient.value.middleName}`
-})
+  router.push(`/patients/${createdPatient.id}`)
+
+  patient.value = {
+    id: '',
+    firstName: '',
+    middleName: '',
+    lastName: '',
+    birthDate: null,
+    gender: 'M',
+  }
+}
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
+  <UForm
+    :schema="patientSchema"
+    :state="patient"
+    class="flex flex-col gap-6"
+    @submit="onSubmit"
+  >
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <UFormField label="Фамилия">
+      <UFormField label="Фамилия" name="lastName">
         <UInput
           v-model="patient.lastName"
           placeholder="Введите фамилию"
@@ -38,7 +50,7 @@ onMounted(async () => {
         />
       </UFormField>
 
-      <UFormField label="Имя">
+      <UFormField label="Имя" name="firstName">
         <UInput
           v-model="patient.firstName"
           placeholder="Введите имя"
@@ -46,7 +58,7 @@ onMounted(async () => {
         />
       </UFormField>
 
-      <UFormField label="Отчество">
+      <UFormField label="Отчество" name="middleName">
         <UInput
           v-model="patient.middleName"
           placeholder="Введите отчество"
@@ -56,15 +68,20 @@ onMounted(async () => {
     </div>
 
     <div class="flex gap-4">
-      <UFormField label="Дата рождения">
+      <UFormField label="Дата рождения" name="birthDate">
         <UInputDate v-model="patient.birthDate" icon="i-lucide-calendar" />
       </UFormField>
 
-      <UFormField label="Пол">
-        <USelect v-model="patient.gender" :items="genderOptions" />
+      <UFormField label="Пол" name="gender">
+        <USelect v-model="patient.gender" :items="genderOptions" class="w-32" />
       </UFormField>
     </div>
 
-    <UButton label="Сохранить" icon="i-lucide-save" block />
-  </div>
+    <UButton
+      type="submit"
+      label="Сохранить пациента"
+      icon="i-lucide-save"
+      block
+    />
+  </UForm>
 </template>
