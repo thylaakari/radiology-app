@@ -1,16 +1,16 @@
 <script setup>
-import { getPaginationRowModel } from '@tanstack/vue-table'
-
 const { setTitle } = useMetaData()
 const { getPatients, formatBirthDate } = usePatient()
 
 const router = useRouter()
-const table = useTemplateRef('table')
-const pagination = ref({ pageIndex: 0, pageSize: 10 })
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 10,
+})
 const globalFilter = ref('')
+const total = ref(0)
 
 const data = ref([])
-
 const columns = [
   {
     accessorKey: 'shortName',
@@ -28,21 +28,30 @@ const columns = [
 
 onMounted(async () => {
   await setTitle('Пациенты')
-
-  const patients = await getPatients()
-
-  data.value = patients.map((patient) => ({
-    ...patient,
-
-    birthDate: formatBirthDate(patient.birthDate),
-
-    gender: patient.gender === 'M' ? 'М' : patient.gender === 'F' ? 'Ж' : '-',
-  }))
+  await loadPatients()
 })
+
+const loadPatients = async () => {
+  const result = await getPatients({
+    page: pagination.value.pageIndex,
+    pageSize: pagination.value.pageSize,
+    search: globalFilter.value,
+  })
+
+  total.value = result.total
+
+  data.value = result.items.map((patient) => ({
+    ...patient,
+    birthDate: formatBirthDate(patient.birthDate),
+    gender: formatGender(patient.gender),
+  }))
+}
 
 function onSelect(e, row) {
   router.push(`/patients/${row.original.id}`)
 }
+
+watch([pagination, globalFilter], loadPatients, { deep: true })
 </script>
 
 <template>
@@ -54,24 +63,13 @@ function onSelect(e, row) {
     />
     <UButton icon="i-lucide-plus" label="Новый пациент" to="/patients/create" />
   </div>
-  <UTable
-    ref="table"
-    sticky
-    :data="data"
-    :columns="columns"
-    @select="onSelect"
-    v-model:pagination="pagination"
-    v-model:global-filter="globalFilter"
-    :pagination-options="{
-      getPaginationRowModel: getPaginationRowModel(),
-    }"
-  />
+  <UTable sticky :data="data" :columns="columns" @select="onSelect" />
   <div class="flex justify-end border-t border-default pt-4">
     <UPagination
-      :page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-      :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-      :total="table?.tableApi?.getFilteredRowModel().rows.length"
-      @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+      :page="pagination.pageIndex + 1"
+      :items-per-page="pagination.pageSize"
+      :total="total"
+      @update:page="(p) => (pagination.pageIndex = p - 1)"
     />
   </div>
 </template>
