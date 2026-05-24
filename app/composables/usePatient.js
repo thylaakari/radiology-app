@@ -39,17 +39,10 @@ export const usePatient = () => {
     return patient
   }
 
-  const getPatients = async ({ page = 0, pageSize = 10, search = '' } = {}) => {
+  const getPatients = async ({ page = 0, pageSize = 10 } = {}) => {
     let query = db.patients.filter((p) => !p.deleted)
 
-    if (search) {
-      const s = search.toLowerCase()
-
-      query = query.and((p) => p.shortName?.toLowerCase().includes(s))
-    }
-
     const total = await query.count()
-
     const items = await query
       .offset(page * pageSize)
       .limit(pageSize)

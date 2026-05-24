@@ -51,7 +51,7 @@ function onSelect(e, row) {
   router.push(`/patients/${row.original.id}`)
 }
 
-watch([pagination, globalFilter], loadPatients, { deep: true })
+watch([pagination], loadPatients, { deep: true })
 </script>
 
 <template>
@@ -63,7 +63,13 @@ watch([pagination, globalFilter], loadPatients, { deep: true })
     />
     <UButton icon="i-lucide-plus" label="Новый пациент" to="/patients/create" />
   </div>
-  <UTable sticky :data="data" :columns="columns" @select="onSelect" />
+  <UTable
+    sticky
+    :data="data"
+    :columns="columns"
+    v-model:global-filter="globalFilter"
+    @select="onSelect"
+  />
   <div class="flex justify-end border-t border-default pt-4">
     <UPagination
       :page="pagination.pageIndex + 1"
