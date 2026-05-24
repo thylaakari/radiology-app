@@ -1,76 +1,83 @@
 <script setup>
+const { getPatients, formatBirthDate } = usePatient()
+
 const router = useRouter()
-
-const patient = ref({
-  id: '4586',
-  shortName: '',
-  firstName: '',
-  middleName: '',
-  lastName: '',
-  birthDate: '',
-  gender: 'M',
-  createdAt: '',
-  updatedAt: '',
-  deleted: false,
+const pagination = ref({
+  pageIndex: 0,
+  pageSize: 5,
 })
+const globalFilter = ref('')
+const total = ref(0)
 
-const genderOptions = [
-  { label: 'Мужской', value: 'M' },
-  { label: 'Женский', value: 'F' },
-  { label: 'Не указан', value: 'U' },
+const data = ref([])
+const columns = [
+  {
+    accessorKey: 'shortName',
+    header: 'ФИО',
+  },
+  {
+    accessorKey: 'birthDate',
+    header: 'Дата рождения',
+  },
+  {
+    accessorKey: 'gender',
+    header: 'Пол',
+  },
 ]
 
-const { formatBirthDate, formatAge } = usePatient()
-
 onMounted(async () => {
-  const fullname = `${patient.value.lastName} ${patient.value.firstName} ${patient.value.middleName}`
+  await loadPatients()
 })
+
+const loadPatients = async () => {
+  const result = await getPatients({
+    page: pagination.value.pageIndex,
+    pageSize: pagination.value.pageSize,
+    search: globalFilter.value,
+  })
+
+  total.value = result.total
+
+  data.value = result.items.map((patient) => ({
+    ...patient,
+    birthDate: formatBirthDate(patient.birthDate),
+    gender: formatGender(patient.gender),
+  }))
+}
+
+function onSelect(e, row) {
+  router.push(`/reports/create/${row.original.id}`)
+}
+
+watch([pagination], loadPatients, { deep: true })
 </script>
 
 <template>
-  <div class="flex flex-col gap-4">
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-      <UFormField label="Фамилия">
-        <UInput
-          v-model="patient.lastName"
-          placeholder="Введите фамилию"
-          class="w-full"
-        />
-      </UFormField>
-
-      <UFormField label="Имя">
-        <UInput
-          v-model="patient.firstName"
-          placeholder="Введите имя"
-          class="w-full"
-        />
-      </UFormField>
-
-      <UFormField label="Отчество">
-        <UInput
-          v-model="patient.middleName"
-          placeholder="Введите отчество"
-          class="w-full"
-        />
-      </UFormField>
-    </div>
-
-    <div class="flex gap-4">
-      <UFormField label="Дата рождения">
-        <UInputDate v-model="patient.birthDate" icon="i-lucide-calendar" />
-      </UFormField>
-
-      <UFormField label="Пол">
-        <USelect v-model="patient.gender" :items="genderOptions" />
-      </UFormField>
-    </div>
-
-    <UButton label="Найти пациента" icon="i-lucide-save" block />
-    <UButton
-      label="Создать протокол с пустым пациентом"
-      icon="i-lucide-plus"
-      variant="outline"
-      block
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight">Новый протокол</h1>
+    <p class="text-sm mt-0.5">Выберите пациента или создайте нового</p>
+  </div>
+  <div class="flex py-4 gap-4 border-b border-accented">
+    <UInput
+      v-model="globalFilter"
+      placeholder="Поиск..."
+      icon="i-lucide-search"
+    />
+    <UButton icon="i-lucide-plus" label="Новый пациент" to="/patients/create" />
+  </div>
+  <UTable
+    sticky
+    :data="data"
+    :columns="columns"
+    v-model:global-filter="globalFilter"
+    @select="onSelect"
+  />
+  <div class="flex justify-end border-t border-default pt-4">
+    <UPagination
+      :page="pagination.pageIndex + 1"
+      :items-per-page="pagination.pageSize"
+      :total="total"
+      @update:page="(p) => (pagination.pageIndex = p - 1)"
     />
   </div>
 </template>

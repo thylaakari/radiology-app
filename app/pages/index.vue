@@ -65,9 +65,7 @@ const getModalityColor = (modality) => {
         <h1 class="text-2xl font-bold tracking-tight">
           Рабочее пространство врача
         </h1>
-        <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
-          Добро пожаловать в Radiology Hub
-        </p>
+        <p class="text-sm mt-0.5">Добро пожаловать в Radiology Hub</p>
       </div>
 
       <div

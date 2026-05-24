@@ -1,5 +1,5 @@
 export const formatGender = (gender?: string) =>
   ({
-    M: 'М',
-    F: 'Ж',
-  })[gender ?? ''] ?? '-'
+    M: 'Мужской',
+    F: 'Женский',
+  })[gender ?? ''] ?? 'Пол: -'
