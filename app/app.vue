@@ -1,4 +1,5 @@
 <script setup>
+import { ru } from '@nuxt/ui/locale'
 const { setTitle } = useMetaData()
 
 onMounted(async () => {
@@ -7,7 +8,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UApp>
+  <UApp :locale="ru">
     <NuxtLayout>
       <NuxtPage />
     </NuxtLayout>
