@@ -1,6 +1,6 @@
 <script setup>
 const { setTitle } = useMetaData()
-const { getPatients, formatBirthDate } = usePatient()
+const { getPatients } = usePatient()
 
 const router = useRouter()
 const pagination = ref({

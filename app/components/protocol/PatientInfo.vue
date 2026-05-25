@@ -6,13 +6,13 @@ const props = defineProps({
   },
 })
 
-const { formatBirthDate, formatAge } = usePatient()
+const { patient } = toRefs(props)
 
 const fullName = computed(() => {
   return [
-    props.patient.lastName,
-    props.patient.firstName,
-    props.patient.middleName,
+    patient.value.lastName,
+    patient.value.firstName,
+    patient.value.middleName,
   ]
     .filter(Boolean)
     .join(' ')

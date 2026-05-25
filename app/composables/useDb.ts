@@ -7,6 +7,8 @@ class AppDatabase extends Dexie {
     this.version(4).stores({
       patients:
         'id, shortName, firstName, middleName, lastName, birthDate, gender, createdAt, updatedAt, deleted',
+      reports:
+        'id, patientId, modality, createdAt, updatedAt, studyDescription, description, conclusion, deleted',
     })
   }
 }

@@ -2,8 +2,6 @@
 const { setTitle } = useMetaData()
 const router = useRouter()
 
-const selectedPatient = ref(null)
-
 onMounted(async () => {
   await setTitle('Новый протокол')
 })
@@ -20,16 +18,7 @@ onMounted(async () => {
       />
 
       <USeparator />
-      <ProtocolCreatePatient
-        v-if="!selectedPatient"
-        @select-patient="selectedPatient = $event"
-      />
-
-      <template v-else>
-        <ProtocolPatientInfo :patient="selectedPatient" />
-
-        <ProtocolCreateProtocol :patient="selectedPatient" />
-      </template>
+      <ProtocolCreatePatient />
     </div>
   </UContainer>
 </template>

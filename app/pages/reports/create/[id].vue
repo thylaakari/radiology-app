@@ -1,7 +1,8 @@
 <script setup>
 const { setTitle } = useMetaData()
-const route = useRoute()
 const { getPatientById } = usePatient()
+const route = useRoute()
+const router = useRouter()
 
 const patient = ref(null)
 
@@ -12,7 +13,18 @@ onMounted(async () => {
 </script>
 
 <template>
-  <ProtocolPatientInfo v-if="patient" :patient="patient" />
+  <UContainer :ui="{ base: 'mx-0' }">
+    <div class="flex flex-col gap-4">
+      <UButton
+        label="Назад"
+        icon="i-lucide-arrow-left"
+        @click="router.back()"
+        variant="link"
+      />
 
-  <ProtocolCreateProtocol />
+      <USeparator />
+      <ProtocolPatientInfo v-if="patient" :patient="patient" />
+      <ProtocolCreateProtocol />
+    </div>
+  </UContainer>
 </template>

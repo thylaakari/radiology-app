@@ -1,16 +1,13 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-
 const { setTitle } = useMetaData()
 
 onMounted(async () => {
-  await setTitle('Главная — Рабочий стол')
+  await setTitle('Главная')
 })
 
 const isOnline = ref(true)
 const pendingSyncCount = ref(3)
 
-// Перевели в computed, чтобы значение автоматически обновлялось при изменении pendingSyncCount
 const stats = computed(() => [
   {
     label: 'Описано сегодня',
