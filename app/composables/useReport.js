@@ -31,12 +31,28 @@ export function useReport() {
     }
   }
 
+  async function getReports() {
+    const reports = await db.reports.orderBy('createdAt').reverse().toArray()
+
+    const patients = await db.patients.toArray()
+
+    const patientsMap = Object.fromEntries(
+      patients.map((patient) => [patient.id, patient.shortName]),
+    )
+
+    return reports.map((report) => ({
+      ...report,
+      shortName: patientsMap[report.patientId] || '—',
+    }))
+  }
+
   async function getReportById(id) {
     return await db.reports.get(id)
   }
 
   return {
     saveReport,
+    getReports,
     getReportById,
   }
 }

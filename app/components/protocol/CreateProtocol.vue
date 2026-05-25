@@ -15,7 +15,6 @@ const report = ref({
   deleted: false,
 })
 const saving = ref(false)
-const modalityItems = ['КТ', 'МРТ', 'Рентген']
 
 async function handleSave() {
   try {
