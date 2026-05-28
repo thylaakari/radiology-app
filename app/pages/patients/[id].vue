@@ -1,17 +1,47 @@
 <script setup>
 import { parseDate } from '@internationalized/date'
+import { getPaginationRowModel } from '@tanstack/vue-table'
 
 const router = useRouter()
 const { setTitle } = useMetaData()
 const { getPatientById, savePatient } = usePatient()
+const { getReportByPatientId } = useReport()
 const route = useRoute()
-
 const patient = ref(null)
 
-const genderOptions = [
-  { label: 'Мужской', value: 'M' },
-  { label: 'Женский', value: 'F' },
-  { label: 'Не указан', value: 'U' },
+const table = useTemplateRef('table')
+const pagination = ref({ pageIndex: 0, pageSize: 10 })
+const globalFilter = ref('')
+
+const reports = ref([])
+
+const columns = [
+  {
+    accessorKey: 'createdAt',
+    header: 'Дата создания',
+    cell: ({ row }) => formatDate(row.getValue('createdAt')),
+  },
+  {
+    accessorKey: 'modality',
+    header: 'Модальность',
+    cell: ({ row }) => {
+      const modality = getModalityConfig(row.getValue('modality'))
+
+      return h(
+        UBadge,
+        {
+          class: 'uppercase',
+          variant: 'soft',
+          color: modality.color,
+        },
+        () => modality.label,
+      )
+    },
+  },
+  {
+    accessorKey: 'studyDescription',
+    header: 'Исследование',
+  },
 ]
 
 const updateTitle = async () => {
@@ -29,112 +59,70 @@ onMounted(async () => {
     return router.push('/patients')
   }
   patient.value.birthDate = parseDate(patient.value.birthDate)
+
+  reports.value = await getReportByPatientId(patient.value.id)
   await updateTitle()
 })
 
-const onSave = async () => {
-  await savePatient(patient.value)
+const onSave = async (patientData) => {
+  await savePatient(patientData)
   await updateTitle()
+}
+
+function onSelect(e, row) {
+  router.push(`/reports/${row.original.id}`)
 }
 </script>
 
 <template>
   <UContainer v-if="patient" :ui="{ base: 'mx-0' }">
-    <UButton
-      label="Назад"
-      icon="i-lucide-arrow-left"
-      variant="link"
-      @click="router.back()"
-    />
-
-    <div class="mb-4 flex flex-col gap-2">
-      <h1 class="text-2xl font-bold tracking-tight">
-        {{ patient.lastName }}
-        {{ patient.firstName }}
-        {{ patient.middleName }}
-      </h1>
-
-      <div class="flex flex-wrap items-center gap-2">
-        <UBadge :label="`ID: ${patient.id}`" variant="soft" color="neutral" />
-
-        <UBadge
-          :label="
-            patient.gender === 'M'
-              ? 'Мужчина'
-              : patient.gender === 'F'
-                ? 'Женщина'
-                : 'Пол не указан'
-          "
-          color="neutral"
-          variant="subtle"
-        />
-
-        <UBadge
-          icon="i-lucide-cake"
-          variant="outline"
-          color="neutral"
-          :label="`${formatBirthDate(patient.birthDate)} • ${formatAge(patient.birthDate)}`"
-        />
-      </div>
-    </div>
-
     <div class="flex flex-col gap-4">
+      <UButton
+        label="Назад"
+        icon="i-lucide-arrow-left"
+        variant="link"
+        @click="router.back()"
+      />
+      <ProtocolPatientInfo v-if="patient" :patient="patient" />
+
       <USeparator />
 
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <UFormField label="Фамилия">
+      <PatientView v-model:patient="patient" @submit="onSave" />
+
+      <USeparator />
+      <div>
+        <h1 class="text-2xl font-bold tracking-tight">Протоколы пациента</h1>
+        <div class="flex py-4 gap-4 border-b border-accented">
           <UInput
-            v-model="patient.lastName"
-            placeholder="Введите фамилию"
-            class="w-full"
+            v-model="globalFilter"
+            placeholder="Поиск..."
+            icon="i-lucide-search"
           />
-        </UFormField>
-
-        <UFormField label="Имя">
-          <UInput
-            v-model="patient.firstName"
-            placeholder="Введите имя"
-            class="w-full"
+          <UButton
+            icon="i-lucide-plus"
+            label="Новый протокол"
+            :to="`/reports/create/${patient.id}`"
           />
-        </UFormField>
-
-        <UFormField label="Отчество">
-          <UInput
-            v-model="patient.middleName"
-            placeholder="Введите отчество"
-            class="w-full"
-          />
-        </UFormField>
-      </div>
-
-      <div class="flex gap-4">
-        <UFormField label="Дата рождения" class="flex-1">
-          <UInputDate v-model="patient.birthDate" icon="i-lucide-calendar" />
-        </UFormField>
-
-        <UFormField label="Пол пациента">
-          <USelect v-model="patient.gender" :items="genderOptions" />
-        </UFormField>
-      </div>
-
-      <UButton
-        label="Сохранить изменения"
-        icon="i-lucide-save"
-        block
-        @click="onSave"
-      />
-
-      <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div class="flex items-center gap-1.5">
-          <UIcon name="i-lucide-clock" />
-          <span> Карточка создана: {{ formatDate(patient.createdAt) }} </span>
         </div>
-
-        <div class="flex items-center gap-1.5">
-          <UIcon name="i-lucide-refresh-cw" />
-          <span>
-            Последнее обновление: {{ formatDate(patient.updatedAt) }}
-          </span>
+        <UTable
+          ref="table"
+          sticky
+          :data="reports"
+          :columns="columns"
+          @select="onSelect"
+          v-model:pagination="pagination"
+          v-model:global-filter="globalFilter"
+          :pagination-options="{
+            getPaginationRowModel: getPaginationRowModel(),
+          }"
+        />
+        <div class="flex justify-end border-t border-default pt-4">
+          <UPagination
+            :page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+            :total="table?.tableApi?.getFilteredRowModel().rows.length"
+            @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+          />
         </div>
       </div>
     </div>

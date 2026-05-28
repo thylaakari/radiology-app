@@ -1,16 +1,20 @@
 <script setup>
 import { patientSchema } from '~/composables/usePatient'
 
+const patient = defineModel('patient', {
+  type: Object,
+  default: () => ({
+    lastName: '',
+    firstName: '',
+    middleName: '',
+    birthDate: null,
+    gender: 'M',
+  }),
+})
+
 const { savePatient } = usePatient()
 const router = useRouter()
-const patient = ref({
-  id: '',
-  firstName: '',
-  middleName: '',
-  lastName: '',
-  birthDate: null,
-  gender: 'M',
-})
+const route = useRoute()
 
 const genderOptions = [
   { label: 'Мужской', value: 'M' },
@@ -18,20 +22,26 @@ const genderOptions = [
   { label: 'Не указан', value: 'U' },
 ]
 
+onMounted(() => {
+  if (route.params.id) {
+    patient.value.id = route.params.id
+  }
+})
+
 const onSubmit = async (event) => {
-  const createdPatient = await savePatient(event.data)
-
-  router.push(`/patients/${createdPatient.id}`)
-
-  patient.value = {
-    id: '',
-    firstName: '',
-    middleName: '',
-    lastName: '',
-    birthDate: null,
-    gender: 'M',
+  if (patient.value.id) {
+    emit('submit', { ...event.data, id: patient.value.id })
+  } else {
+    const createdPatient = await savePatient(event.data)
+    if (route.query.reportCreate) {
+      router.push(`/reports/create/${createdPatient.id}`)
+    } else {
+      router.push(`/patients/${createdPatient.id}`)
+    }
   }
 }
+
+const emit = defineEmits(['submit'])
 </script>
 
 <template>

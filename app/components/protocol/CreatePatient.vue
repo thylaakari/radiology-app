@@ -63,7 +63,11 @@ watch([pagination], loadPatients, { deep: true })
       placeholder="Поиск..."
       icon="i-lucide-search"
     />
-    <UButton icon="i-lucide-plus" label="Новый пациент" to="/patients/create" />
+    <UButton
+      icon="i-lucide-plus"
+      label="Новый пациент"
+      to="/patients/create?reportCreate=true"
+    />
   </div>
   <UTable
     sticky

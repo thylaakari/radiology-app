@@ -1,7 +1,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   css: ['~/assets/css/main.css'],
-  devtools: { enabled: true },
+  devtools: { enabled: false },
   modules: ['@nuxt/ui'],
   ssr: false,
   ui: {
@@ -10,13 +10,14 @@ export default defineNuxtConfig({
   vite: {
     optimizeDeps: {
       include: [
+        '@internationalized/date',
         '@tanstack/vue-table',
-        '@vue/devtools-core',
-        '@vue/devtools-kit',
         '@tauri-apps/api/webviewWindow',
         '@tauri-apps/api/window',
-        'zod',
+        '@vue/devtools-core',
+        '@vue/devtools-kit',
         'dexie',
+        'zod',
       ],
     },
   },

@@ -14,7 +14,7 @@ export function useReport() {
       }
       await db.reports.put(reportData)
       toast.add({
-        title: 'Протокол сохранен',
+        title: reportData.id ? 'Протокол обновлен' : 'Протокол сохранен',
         icon: 'i-lucide-check',
         color: 'success',
       })
@@ -50,9 +50,30 @@ export function useReport() {
     return await db.reports.get(id)
   }
 
+  async function getReportByPatientId(patientId) {
+    try {
+      const reports = await db.reports
+        .where('patientId')
+        .equals(patientId)
+        .reverse()
+        .sortBy('createdAt')
+
+      return reports
+    } catch (error) {
+      toast.add({
+        title: 'Ошибка получения протоколов',
+        description: 'Не удалось получить протоколы',
+        icon: 'i-lucide-circle-alert',
+        color: 'error',
+      })
+      return []
+    }
+  }
+
   return {
     saveReport,
     getReports,
     getReportById,
+    getReportByPatientId,
   }
 }

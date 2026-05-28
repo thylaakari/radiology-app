@@ -2,7 +2,7 @@
 const props = defineProps({
   heightClass: {
     type: String,
-    default: 'h-30',
+    default: 'min-h-30',
   },
 })
 

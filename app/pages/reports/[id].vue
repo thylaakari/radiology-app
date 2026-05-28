@@ -1,6 +1,6 @@
 <script setup>
 const { setTitle } = useMetaData()
-const { getReportById } = useReport()
+const { getReportById, saveReport } = useReport()
 const { getPatientById } = usePatient()
 
 const router = useRouter()
@@ -20,6 +20,10 @@ onMounted(async () => {
     birthDate: formatBirthDate(patient.value.birthDate),
   })
 })
+
+const onSave = async () => {
+  await saveReport(report.value)
+}
 </script>
 
 <template>
@@ -66,7 +70,7 @@ onMounted(async () => {
           height-class="min-h-100"
         />
         <CommonEditor v-model="report.conclusion" placeholder="Заключение..." />
-        <UButton label="Сохранить" icon="i-lucide-save" block />
+        <UButton label="Сохранить" icon="i-lucide-save" block @click="onSave" />
       </div>
     </div>
   </UContainer>
