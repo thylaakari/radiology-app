@@ -1,5 +1,6 @@
-<script setup lang="ts">
+<script setup>
 const { saveReport } = useReport()
+const { selectedTemplate } = useProtocolEditor()
 const route = useRoute()
 const router = useRouter()
 
@@ -25,6 +26,13 @@ async function handleSave() {
     saving.value = false
   }
 }
+
+watch(selectedTemplate, (template) => {
+  if (!template) return
+
+  report.value.description = template.description || ''
+  report.value.conclusion = template.conclusion || ''
+})
 </script>
 
 <template>
