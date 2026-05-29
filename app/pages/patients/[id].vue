@@ -75,56 +75,47 @@ function onSelect(e, row) {
 </script>
 
 <template>
-  <UContainer v-if="patient" :ui="{ base: 'mx-0' }">
-    <div class="flex flex-col gap-4">
-      <UButton
-        label="Назад"
-        icon="i-lucide-arrow-left"
-        variant="link"
-        @click="router.back()"
+  <CommonRouterBack />
+  <ProtocolPatientInfo v-if="patient" :patient="patient" />
+
+  <USeparator />
+
+  <PatientView v-model:patient="patient" @submit="onSave" />
+
+  <USeparator />
+  <div>
+    <h1 class="text-2xl font-bold tracking-tight">Протоколы пациента</h1>
+    <div class="flex py-4 gap-4 border-b border-accented">
+      <UInput
+        v-model="globalFilter"
+        placeholder="Поиск..."
+        icon="i-lucide-search"
       />
-      <ProtocolPatientInfo v-if="patient" :patient="patient" />
-
-      <USeparator />
-
-      <PatientView v-model:patient="patient" @submit="onSave" />
-
-      <USeparator />
-      <div>
-        <h1 class="text-2xl font-bold tracking-tight">Протоколы пациента</h1>
-        <div class="flex py-4 gap-4 border-b border-accented">
-          <UInput
-            v-model="globalFilter"
-            placeholder="Поиск..."
-            icon="i-lucide-search"
-          />
-          <UButton
-            icon="i-lucide-plus"
-            label="Новый протокол"
-            :to="`/reports/create/${patient.id}`"
-          />
-        </div>
-        <UTable
-          ref="table"
-          sticky
-          :data="reports"
-          :columns="columns"
-          @select="onSelect"
-          v-model:pagination="pagination"
-          v-model:global-filter="globalFilter"
-          :pagination-options="{
-            getPaginationRowModel: getPaginationRowModel(),
-          }"
-        />
-        <div class="flex justify-end border-t border-default pt-4">
-          <UPagination
-            :page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
-            :items-per-page="table?.tableApi?.getState().pagination.pageSize"
-            :total="table?.tableApi?.getFilteredRowModel().rows.length"
-            @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
-          />
-        </div>
-      </div>
+      <UButton
+        icon="i-lucide-plus"
+        label="Новый протокол"
+        :to="`/reports/create/${patient.id}`"
+      />
     </div>
-  </UContainer>
+    <UTable
+      ref="table"
+      sticky
+      :data="reports"
+      :columns="columns"
+      @select="onSelect"
+      v-model:pagination="pagination"
+      v-model:global-filter="globalFilter"
+      :pagination-options="{
+        getPaginationRowModel: getPaginationRowModel(),
+      }"
+    />
+    <div class="flex justify-end border-t border-default pt-4">
+      <UPagination
+        :page="(table?.tableApi?.getState().pagination.pageIndex || 0) + 1"
+        :items-per-page="table?.tableApi?.getState().pagination.pageSize"
+        :total="table?.tableApi?.getFilteredRowModel().rows.length"
+        @update:page="(p) => table?.tableApi?.setPageIndex(p - 1)"
+      />
+    </div>
+  </div>
 </template>

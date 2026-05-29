@@ -7,7 +7,11 @@
       </template>
 
       <template #body>
-        <slot></slot>
+        <UContainer :ui="{ base: 'mx-0' }">
+          <div class="flex flex-col gap-4">
+            <slot></slot>
+          </div>
+        </UContainer>
       </template>
     </UDashboardPanel>
   </UDashboardGroup>

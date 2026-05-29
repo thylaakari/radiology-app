@@ -8,17 +8,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <UContainer :ui="{ base: 'mx-0' }">
-    <div class="flex flex-col gap-4">
-      <UButton
-        label="Назад"
-        icon="i-lucide-arrow-left"
-        @click="router.back()"
-        variant="link"
-      />
-
-      <USeparator />
-      <PatientView />
-    </div>
-  </UContainer>
+  <CommonRouterBack />
+  <USeparator />
+  <PatientView />
 </template>

@@ -27,14 +27,9 @@ const onSave = async () => {
 </script>
 
 <template>
-  <UContainer :ui="{ base: 'mx-0' }" v-if="report && patient">
+  <div v-if="report && patient">
     <div class="flex flex-col gap-4">
-      <UButton
-        label="Назад"
-        icon="i-lucide-arrow-left"
-        @click="router.back()"
-        variant="link"
-      />
+      <CommonRouterBack />
       <ProtocolPatientInfo v-if="patient" :patient="patient" />
       <USeparator />
       <div class="flex flex-col gap-3 mb-5">
@@ -73,5 +68,5 @@ const onSave = async () => {
         <UButton label="Сохранить" icon="i-lucide-save" block @click="onSave" />
       </div>
     </div>
-  </UContainer>
+  </div>
 </template>
