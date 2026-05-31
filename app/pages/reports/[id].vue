@@ -1,6 +1,6 @@
 <script setup>
 const { setTitle } = useMetaData()
-const { getReportById, saveReport } = useReport()
+const { getReportById } = useReport()
 const { getPatientById } = usePatient()
 
 const router = useRouter()
@@ -20,53 +20,19 @@ onMounted(async () => {
     birthDate: formatBirthDate(patient.value.birthDate),
   })
 })
-
-const onSave = async () => {
-  await saveReport(report.value)
-}
 </script>
 
 <template>
-  <div v-if="report && patient">
-    <div class="flex flex-col gap-4">
+  <div class="flex gap-4 h-full" v-if="report && patient">
+    <div class="flex flex-col gap-4 flex-1 min-w-0">
       <CommonRouterBack />
-      <ProtocolPatientInfo v-if="patient" :patient="patient" />
       <USeparator />
-      <div class="flex flex-col gap-3 mb-5">
-        <h1 class="text-xl font-semibold leading-snug">
-          {{ report.studyDescription }}
-        </h1>
-
-        <div class="flex flex-wrap items-center gap-2">
-          <UBadge
-            :label="report.modality.toUpperCase()"
-            variant="soft"
-            :color="getModalityConfig(report.modality).color"
-          />
-          <UBadge
-            icon="i-lucide-calendar"
-            color="neutral"
-            variant="outline"
-            :label="`Создан: ${formatDate(report.createdAt)}`"
-          />
-          <UBadge
-            icon="i-lucide-calendar"
-            color="neutral"
-            variant="outline"
-            :label="`Обновлен: ${formatDate(report.updatedAt)}`"
-          />
-        </div>
-      </div>
-
-      <div class="w-full flex flex-col gap-4">
-        <CommonEditor
-          v-model="report.description"
-          placeholder="Описание..."
-          height-class="min-h-100"
-        />
-        <CommonEditor v-model="report.conclusion" placeholder="Заключение..." />
-        <UButton label="Сохранить" icon="i-lucide-save" block @click="onSave" />
-      </div>
+      <ProtocolPatientInfo v-if="patient" :patient="patient" />
+      <ProtocolCreateProtocol :report="report" :patient="patient" />
     </div>
+
+    <aside class="w-1/4 shrink-0 flex flex-col gap-4">
+      <ProtocolTemplatePicker />
+    </aside>
   </div>
 </template>

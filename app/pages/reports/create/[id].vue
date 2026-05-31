@@ -17,7 +17,7 @@ onMounted(async () => {
       <CommonRouterBack />
       <USeparator />
       <ProtocolPatientInfo v-if="patient" :patient="patient" />
-      <ProtocolCreateProtocol />
+      <ProtocolCreateProtocol :patient="patient" />
     </div>
 
     <aside class="w-1/4 shrink-0 flex flex-col gap-4">
