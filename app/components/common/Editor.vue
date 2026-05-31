@@ -40,7 +40,7 @@ const items = [
         'flex flex-col [&>.tiptap]:flex-1 [&>.tiptap]:p-4 [&>.tiptap]:focus:outline-none',
       ],
     }"
-    class="border border-default focus-within:border-primary rounded-xl"
+    class="border border-default focus-within:border-primary rounded-xl overflow-hidden flex flex-col"
   >
     <UEditorToolbar
       :editor="editor"

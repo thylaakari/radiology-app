@@ -18,7 +18,7 @@ const columns = [
     cell: ({ row }) => formatDate(row.getValue('createdAt')),
   },
   {
-    accessorKey: 'shortName',
+    accessorKey: 'fullName',
     header: 'ФИО',
   },
   {

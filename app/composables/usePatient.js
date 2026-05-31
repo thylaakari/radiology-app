@@ -50,8 +50,11 @@ export const usePatient = () => {
       .toArray()
 
     return {
-      items,
       total,
+      items: items.map((p) => ({
+        ...p,
+        fullName: `${p.lastName} ${p.firstName} ${p.middleName}`.trim(),
+      })),
     }
   }
 

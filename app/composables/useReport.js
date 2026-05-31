@@ -33,16 +33,18 @@ export function useReport() {
 
   async function getReports() {
     const reports = await db.reports.orderBy('createdAt').reverse().toArray()
-
     const patients = await db.patients.toArray()
 
     const patientsMap = Object.fromEntries(
-      patients.map((patient) => [patient.id, patient.shortName]),
+      patients.map((p) => [
+        p.id,
+        `${p.lastName} ${p.firstName} ${p.middleName}`.trim(),
+      ]),
     )
 
     return reports.map((report) => ({
       ...report,
-      shortName: patientsMap[report.patientId] || '—',
+      fullName: patientsMap[report.patientId] || '—',
     }))
   }
 
@@ -102,13 +104,17 @@ export function useReport() {
 
     const patientIds = [...new Set(reports.map((r) => r.patientId))]
     const patients = await db.patients.where('id').anyOf(patientIds).toArray()
+
     const patientsMap = Object.fromEntries(
-      patients.map((p) => [p.id, p.shortName]),
+      patients.map((p) => [
+        p.id,
+        `${p.lastName} ${p.firstName} ${p.middleName}`.trim(),
+      ]),
     )
 
     return reports.map((report) => ({
       ...report,
-      shortName: patientsMap[report.patientId] || '—',
+      fullName: patientsMap[report.patientId] || '—',
     }))
   }
 
