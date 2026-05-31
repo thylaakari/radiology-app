@@ -39,7 +39,7 @@ onMounted(async () => {
 const onSubmit = async (event) => {
   const saved = await saveTemplate({
     ...event.data,
-    id: route.params.id || undefined,
+    id: isEdit ? route.params.id : undefined,
   })
   router.push(isEdit ? `/templates/${saved.id}` : '/templates')
 }

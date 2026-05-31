@@ -1,4 +1,6 @@
 <script setup>
+import { Router } from 'lucide'
+
 const props = defineProps({
   report: Object,
   patient: Object,
@@ -6,7 +8,7 @@ const props = defineProps({
 
 const { saveReport } = useReport()
 const { selectedTemplate } = useProtocolEditor()
-const route = useRoute()
+const router = useRouter()
 const saving = ref(false)
 
 const localReport = ref(
@@ -34,7 +36,11 @@ watch(
 async function handleSave() {
   try {
     saving.value = true
-    await saveReport({ ...localReport.value, patientId: props.patient.id })
+    const savedReport = await saveReport({
+      ...localReport.value,
+      patientId: props.patient.id,
+    })
+    router.push(`/reports/${savedReport.id}`)
   } finally {
     saving.value = false
   }
