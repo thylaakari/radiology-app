@@ -17,6 +17,7 @@ export default defineNuxtConfig({
         '@vue/devtools-core',
         '@vue/devtools-kit',
         'dexie',
+        'lucide',
         'zod',
       ],
     },
