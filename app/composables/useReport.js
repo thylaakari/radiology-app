@@ -70,10 +70,56 @@ export function useReport() {
     }
   }
 
+  async function countToday() {
+    const start = new Date()
+    start.setHours(0, 0, 0, 0)
+    return await db.reports
+      .where('createdAt')
+      .aboveOrEqual(start.toISOString())
+      .count()
+  }
+
+  async function countThisMonth() {
+    const start = new Date()
+    start.setDate(1)
+    start.setHours(0, 0, 0, 0)
+    return await db.reports
+      .where('createdAt')
+      .aboveOrEqual(start.toISOString())
+      .count()
+  }
+
+  async function countTotal() {
+    return await db.reports.count()
+  }
+
+  async function getRecentReports(limit = 3) {
+    const reports = await db.reports
+      .orderBy('createdAt')
+      .reverse()
+      .limit(limit)
+      .toArray()
+
+    const patientIds = [...new Set(reports.map((r) => r.patientId))]
+    const patients = await db.patients.where('id').anyOf(patientIds).toArray()
+    const patientsMap = Object.fromEntries(
+      patients.map((p) => [p.id, p.shortName]),
+    )
+
+    return reports.map((report) => ({
+      ...report,
+      shortName: patientsMap[report.patientId] || '—',
+    }))
+  }
+
   return {
     saveReport,
     getReports,
     getReportById,
     getReportByPatientId,
+    getRecentReports,
+    countToday,
+    countThisMonth,
+    countTotal,
   }
 }

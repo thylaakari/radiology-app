@@ -1,56 +1,42 @@
 <script setup>
 const { setTitle } = useMetaData()
+const { countToday, countThisMonth, countTotal, getRecentReports } = useReport()
+
+const todayCount = ref(0)
+const monthCount = ref(0)
+const totalCount = ref(0)
+const recentReports = ref([])
 
 onMounted(async () => {
   await setTitle('Главная')
+  ;[todayCount.value, monthCount.value, totalCount.value] = await Promise.all([
+    countToday(),
+    countThisMonth(),
+    countTotal(),
+  ])
+  recentReports.value = await getRecentReports(5)
 })
-
-const isOnline = ref(true)
-const pendingSyncCount = ref(3)
 
 const stats = computed(() => [
   {
     label: 'Описано сегодня',
-    value: '14',
+    value: todayCount.value,
+    icon: 'i-lucide-file-text',
+    color: 'text-primary',
   },
   {
     label: 'Описано в этом месяце',
-    value: pendingSyncCount.value,
+    value: monthCount.value,
+    icon: 'i-lucide-calendar',
+    color: 'text-primary',
   },
   {
     label: 'Описано всего',
-    value: '42',
+    value: totalCount.value,
+    icon: 'i-lucide-layers',
+    color: 'text-success',
   },
 ])
-
-const recentStudies = ref([
-  {
-    id: '1',
-    patientName: 'Павлов Илья Ж.',
-    modality: 'CT',
-    date: 'Сегодня, 10:24',
-    status: 'draft',
-  },
-  {
-    id: '2',
-    patientName: 'Иванова Анна С.',
-    modality: 'MRI',
-    date: 'Сегодня, 09:15',
-    status: 'synced',
-  },
-  {
-    id: '3',
-    patientName: 'Петров Петр П.',
-    modality: 'XR',
-    date: 'Вчера, 17:40',
-    status: 'synced',
-  },
-])
-
-const getModalityColor = (modality) => {
-  const colors = { CT: 'secondary', MRI: 'error', XR: 'neutral', US: 'warning' }
-  return colors[modality] || 'success'
-}
 </script>
 
 <template>
@@ -61,23 +47,9 @@ const getModalityColor = (modality) => {
       <h1 class="text-2xl font-bold tracking-tight">
         Рабочее пространство врача
       </h1>
-      <p class="text-sm mt-0.5">Добро пожаловать в Radiology Hub</p>
-    </div>
-
-    <div
-      class="flex items-center gap-2 text-sm px-3 py-1.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-neutral-50 dark:bg-neutral-900"
-    >
-      <span
-        class="w-2 h-2 rounded-full animate-pulse"
-        :class="isOnline ? 'bg-green-500' : 'bg-amber-500'"
-      ></span>
-      <span v-if="isOnline && pendingSyncCount === 0"
-        >Связь со Strapi стабильна</span
-      >
-      <span v-else-if="isOnline && pendingSyncCount > 0"
-        >Синхронизация... (осталось: {{ pendingSyncCount }})</span
-      >
-      <span v-else>Автономный режим (IndexedDB)</span>
+      <p class="text-sm text-neutral-500 dark:text-neutral-400 mt-0.5">
+        Добро пожаловать в Radiology App
+      </p>
     </div>
   </div>
 
@@ -87,14 +59,19 @@ const getModalityColor = (modality) => {
     <div
       v-for="stat in stats"
       :key="stat.label"
-      class="p-4 rounded-xl bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800"
+      class="group p-4 rounded-xl border cursor-default select-none bg-neutral-50 dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 hover:border-primary hover:bg-white dark:hover:bg-neutral-800/60 hover:shadow-md transition-all duration-200"
     >
-      <p
-        class="text-xs font-medium text-neutral-500 dark:text-neutral-400 uppercase tracking-wider"
-      >
-        {{ stat.label }}
-      </p>
-      <p class="text-2xl font-semibold mt-1">{{ stat.value }}</p>
+      <div class="flex items-start justify-between">
+        <p class="text-xs font-medium uppercase tracking-wider">
+          {{ stat.label }}
+        </p>
+        <UIcon
+          :name="stat.icon"
+          class="w-4 h-4 opacity-40 group-hover:opacity-80 transition-opacity duration-200"
+          :class="stat.color"
+        />
+      </div>
+      <p class="text-2xl font-semibold mt-2 tabular-nums">{{ stat.value }}</p>
     </div>
   </div>
 
@@ -104,43 +81,51 @@ const getModalityColor = (modality) => {
         <h2 class="text-lg font-semibold tracking-tight">
           Последние протоколы
         </h2>
-        <UButton to="/patients/qwe" icon="i-lucide-plus" color="primary"
-          >Новый пациент</UButton
-        >
+        <UButton to="/reports/create" icon="i-lucide-plus">
+          Новый протокол
+        </UButton>
       </div>
 
       <div
         class="rounded-xl border border-neutral-200 dark:border-neutral-800 overflow-hidden bg-neutral-50 dark:bg-neutral-900"
       >
-        <div
-          v-if="recentStudies.length === 0"
-          class="p-8 text-center text-neutral-500"
-        >
-          Нет недавних исследований. Начните работу, создав новый протокол.
+        <div v-if="recentReports.length === 0" class="p-8 text-center">
+          <UIcon
+            name="i-lucide-folder-open"
+            class="w-10 h-10 mx-auto mb-3 opacity-30"
+          />
+          <p>Нет недавних протоколов. Создайте первый.</p>
         </div>
 
         <div v-else class="divide-y divide-neutral-200 dark:divide-neutral-800">
-          <div
-            v-for="study in recentStudies"
-            :key="study.id"
-            class="p-4 flex items-center gap-3 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition cursor-pointer"
-            @click="navigateTo(`/patients/${study.id}`)"
+          <NuxtLink
+            v-for="report in recentReports"
+            :key="report.id"
+            :to="`/reports/${report.id}`"
+            class="flex items-center gap-3 p-4 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 active:bg-neutral-200 dark:active:bg-neutral-700/50 transition-colors duration-150 cursor-pointer"
           >
             <UBadge
-              :color="getModalityColor(study.modality)"
+              :color="getModalityConfig(report.modality).color"
               variant="soft"
-              class="uppercase font-bold shrink-0"
+              class="uppercase font-bold shrink-0 w-12 justify-center"
             >
-              {{ study.modality }}
+              {{ getModalityConfig(report.modality).label }}
             </UBadge>
 
-            <div>
-              <p class="font-medium text-sm">{{ study.patientName }}</p>
+            <div class="flex-1 min-w-0">
+              <p class="font-medium text-sm truncate">
+                {{ report.shortName }} &middot; {{ report.studyDescription }}
+              </p>
               <p class="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
-                {{ study.date }}
+                {{ formatDate(report.updatedAt) }}
               </p>
             </div>
-          </div>
+
+            <UIcon
+              name="i-lucide-chevron-right"
+              class="w-4 h-4 shrink-0 text-neutral-400 dark:text-neutral-600"
+            />
+          </NuxtLink>
         </div>
       </div>
     </div>
