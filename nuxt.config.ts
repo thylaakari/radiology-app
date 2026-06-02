@@ -21,7 +21,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   css: ['~/assets/css/main.css'],
   devtools: { enabled: false },
-  modules: ['@nuxt/ui'],
+  modules: ['@nuxt/ui', '@nuxtjs/strapi'],
   ssr: false,
   ui: {
     fonts: false,
@@ -39,6 +39,20 @@ export default defineNuxtConfig({
         'lucide',
         'zod',
       ],
+    },
+  },
+  strapi: {
+    version: 'v5',
+    prefix: '/api',
+  },
+  runtimeConfig: {
+    strapi: {
+      token: '',
+    },
+    public: {
+      strapi: {
+        url: '',
+      },
     },
   },
 })

@@ -4,7 +4,7 @@ class AppDatabase extends Dexie {
   constructor() {
     super('radiology-hub')
 
-    this.version(6).stores({
+    this.version(7).stores({
       patients:
         'id, shortName, firstName, middleName, lastName, birthDate, gender, createdAt, updatedAt, deleted',
       reports:

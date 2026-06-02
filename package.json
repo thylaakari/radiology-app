@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@nuxt/ui": "^4.8.0",
+    "@nuxtjs/strapi": "^2.2.0",
     "@tauri-apps/api": "^2.11.0",
     "dexie": "^4.4.2",
     "lucide": "^1.16.0",

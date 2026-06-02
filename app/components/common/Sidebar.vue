@@ -27,28 +27,28 @@ const items = [
       icon: 'i-lucide-book-open',
     },
   ],
-  // [
-  //   {
-  //     label: 'Обратная связь',
-  //     to: '/feedback',
-  //     icon: 'i-lucide-message-circle',
-  //   },
-  //   {
-  //     label: 'Настройки',
-  //     to: '/settings',
-  //     icon: 'i-lucide-settings',
-  //   },
-  //   {
-  //     label: 'Помощь',
-  //     to: '/help',
-  //     icon: 'i-lucide-help-circle',
-  //   },
-  //   {
-  //     label: 'О программе',
-  //     to: '/about',
-  //     icon: 'i-lucide-info',
-  //   },
-  // ],
+  [
+    {
+      label: 'Обратная связь',
+      to: '/feedback',
+      icon: 'i-lucide-message-circle',
+    },
+    //   {
+    //     label: 'Настройки',
+    //     to: '/settings',
+    //     icon: 'i-lucide-settings',
+    //   },
+    //   {
+    //     label: 'Помощь',
+    //     to: '/help',
+    //     icon: 'i-lucide-help-circle',
+    //   },
+    //   {
+    //     label: 'О программе',
+    //     to: '/about',
+    //     icon: 'i-lucide-info',
+    //   },
+  ],
 ]
 </script>
 
