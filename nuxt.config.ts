@@ -21,7 +21,7 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   css: ['~/assets/css/main.css'],
   devtools: { enabled: false },
-  modules: ['@nuxt/ui', '@nuxtjs/strapi'],
+  modules: ['@nuxt/ui', '@nuxtjs/supabase', '@nuxt/content'],
   ssr: false,
   ui: {
     fonts: false,
@@ -41,18 +41,7 @@ export default defineNuxtConfig({
       ],
     },
   },
-  strapi: {
-    version: 'v5',
-    prefix: '/api',
-  },
-  runtimeConfig: {
-    strapi: {
-      token: '',
-    },
-    public: {
-      strapi: {
-        url: '',
-      },
-    },
+  supabase: {
+    redirect: false,
   },
 })

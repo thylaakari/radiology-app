@@ -30,7 +30,7 @@ const items = [
   [
     {
       label: 'Обратная связь',
-      to: '/feedback',
+      to: '/feedback/create', //временно
       icon: 'i-lucide-message-circle',
     },
     //   {
@@ -43,11 +43,11 @@ const items = [
     //     to: '/help',
     //     icon: 'i-lucide-help-circle',
     //   },
-    //   {
-    //     label: 'О программе',
-    //     to: '/about',
-    //     icon: 'i-lucide-info',
-    //   },
+    {
+      label: 'О программе',
+      to: '/about',
+      icon: 'i-lucide-info',
+    },
   ],
 ]
 </script>

@@ -3,6 +3,8 @@ import { feedbackSchema } from '~/composables/useFeedback'
 
 const { setTitle } = useMetaData()
 const { saveFeedback } = useFeedback()
+const router = useRouter()
+const toast = useToast()
 
 const loading = ref(false)
 
@@ -24,11 +26,21 @@ onMounted(async () => {
 async function onSubmit(event) {
   try {
     loading.value = true
-    const feedback = await saveFeedback({
-      ...event.data,
-      documentId: state.documentId,
+    await saveFeedback(event.data)
+    await router.push(`/`)
+
+    toast.add({
+      title: 'Обращение создано',
+      color: 'success',
+      icon: 'i-lucide-check-circle',
     })
-    await navigateTo(`/feedback/${feedback.documentId}`)
+  } catch (error) {
+    toast.add({
+      title: 'Ошибка',
+      description: error.message,
+      color: 'error',
+      icon: 'i-lucide-alert-circle',
+    })
   } finally {
     loading.value = false
   }

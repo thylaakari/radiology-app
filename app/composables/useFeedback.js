@@ -8,107 +8,82 @@ export const feedbackSchema = z.object({
     .trim()
     .min(1, 'Введите email')
     .email('Введите корректный email'),
-  f_status: z.enum(['new', 'in_progress', 'answered', 'closed']).default('new'),
+  status: z.enum(['new', 'in_progress', 'answered', 'closed']).default('new'),
 })
 
 export const useFeedback = () => {
   const toast = useToast()
-  const client = useStrapiClient()
+  const client = useSupabaseClient()
 
   const normalizeFeedback = (item) => {
-    const source = item?.attributes ? { id: item.id, ...item.attributes } : item
+    if (!item) return null
 
     return {
-      id: source.id,
-      documentId: source.documentId,
-      subject: source.subject,
-      message: source.message,
-      answer: source.answer,
-      email: source.email,
-      f_status: source.f_status,
-      createdAt: source.createdAt,
-      updatedAt: source.updatedAt,
-      publishedAt: source.publishedAt,
+      id: item.id,
+      subject: item.subject,
+      message: item.message,
+      answer: item.answer,
+      email: item.email,
+      status: item.status,
+      createdAt: item.created_at,
+      updatedAt: item.updated_at,
+    }
+  }
+
+  const handleError = (
+    error,
+    fallbackMessage = 'Ошибка при работе с обращением',
+  ) => {
+    if (error) {
+      throw new Error(error.message || fallbackMessage)
     }
   }
 
   const saveFeedback = async (data) => {
-    const payload = {
-      subject: data.subject,
-      message: data.message,
-      email: data.email,
-      f_status: data.f_status || 'new',
-    }
-
-    let response
-
-    if (data.documentId) {
-      response = await client(`/feedbacks/${data.documentId}`, {
-        method: 'PUT',
-        body: {
-          data: payload,
-        },
-      })
-    } else {
-      response = await client('/feedbacks', {
-        method: 'POST',
-        body: {
-          data: payload,
-        },
-      })
-    }
-
-    const feedback = normalizeFeedback(response.data)
-
-    toast.add({
-      title: data.documentId ? 'Обращение обновлено' : 'Обращение создано',
-      color: 'success',
-      icon: 'i-lucide-check-circle',
-    })
-
-    return feedback
+    return await client.from('feedbacks').insert(data)
   }
 
   const getFeedback = async ({ page = 1, pageSize = 10 } = {}) => {
-    const response = await client('/feedbacks', {
-      method: 'GET',
-      params: {
-        'pagination[page]': page,
-        'pagination[pageSize]': pageSize,
-        'sort[0]': 'createdAt:desc',
-      },
-    })
+    const from = (page - 1) * pageSize
+    const to = from + pageSize - 1
+
+    const [{ data, error }, { count, error: countError }] = await Promise.all([
+      client
+        .from('feedbacks')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .range(from, to),
+
+      client.from('feedbacks').select('*', { count: 'exact', head: true }),
+    ])
+
+    handleError(error)
+    handleError(countError)
 
     return {
-      total: response.meta?.pagination?.total || 0,
-      items: (response.data || []).map(normalizeFeedback),
+      total: count || 0,
+      items: (data || []).map(normalizeFeedback),
     }
   }
 
-  const getFeedbackById = async (documentId) => {
-    const response = await client(`/feedbacks/${documentId}`, {
-      method: 'GET',
-    })
+  const getFeedbackById = async (id) => {
+    const { data, error } = await client
+      .from('feedbacks')
+      .select('*')
+      .eq('id', id)
+      .single()
 
-    return response?.data ? normalizeFeedback(response.data) : null
-  }
+    if (error) {
+      if (error.code === 'PGRST116') return null
+      handleError(error)
+    }
 
-  const deleteFeedback = async (documentId) => {
-    await client(`/feedbacks/${documentId}`, {
-      method: 'DELETE',
-    })
-
-    toast.add({
-      title: 'Обращение удалено',
-      color: 'warning',
-      icon: 'i-lucide-trash',
-    })
+    return normalizeFeedback(data)
   }
 
   return {
     saveFeedback,
     getFeedback,
     getFeedbackById,
-    deleteFeedback,
   }
 }
