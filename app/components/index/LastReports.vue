@@ -35,14 +35,6 @@ onMounted(async () => {
           :to="`/reports/${report.id}`"
           class="flex items-center gap-3 p-4 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 active:bg-neutral-200 dark:active:bg-neutral-700/50 transition-colors duration-150 cursor-pointer"
         >
-          <UBadge
-            :color="getModalityConfig(report.modality).color"
-            variant="soft"
-            class="uppercase font-bold shrink-0 w-12 justify-center"
-          >
-            {{ getModalityConfig(report.modality).label }}
-          </UBadge>
-
           <div class="flex-1 min-w-0">
             <p class="font-medium text-sm truncate">
               {{ report.fullName }} &middot; {{ report.studyDescription }}
@@ -51,6 +43,14 @@ onMounted(async () => {
               {{ formatDate(report.updatedAt) }}
             </p>
           </div>
+
+          <UBadge
+            :color="getModalityConfig(report.modality).color"
+            variant="soft"
+            class="uppercase font-bold shrink-0 justify-center"
+          >
+            {{ getModalityConfig(report.modality).label }}
+          </UBadge>
 
           <UIcon
             name="i-lucide-chevron-right"
