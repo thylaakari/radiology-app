@@ -4,11 +4,13 @@ const props = defineProps({
   patient: Object,
 })
 
-const { saveReport } = useReport()
+const { saveReport, deleteReport } = useReport()
 const { selectedTemplate } = useProtocolEditor()
 const router = useRouter()
 const saving = ref(false)
+const deleting = ref(false)
 const copied = ref(false)
+const isDeleteOpen = ref(false)
 let copyTimer = null
 
 const localReport = ref(
@@ -78,6 +80,19 @@ async function handleCopy() {
   }, 5000)
 }
 
+async function handleDelete() {
+  if (!localReport.value.id) return
+
+  try {
+    deleting.value = true
+    await deleteReport(localReport.value.id)
+    isDeleteOpen.value = false
+    router.push(`/patients/${props.patient.id}`)
+  } finally {
+    deleting.value = false
+  }
+}
+
 watch(selectedTemplate, (template) => {
   if (!template) return
   localReport.value.description = template.description || ''
@@ -138,6 +153,47 @@ onBeforeUnmount(() => {
           @click="handleCopy"
         />
       </UTooltip>
+      <UButton
+        type="button"
+        icon="i-lucide-trash"
+        variant="soft"
+        color="error"
+        @click="isDeleteOpen = true"
+      />
     </div>
   </div>
+  <UModal v-model:open="isDeleteOpen" prevent-close>
+    <template #content>
+      <div class="p-6 space-y-4">
+        <div class="space-y-1">
+          <h3 class="text-lg font-semibold">Удалить протокол?</h3>
+          <p class="text-sm text-muted">
+            Протокол будет помечен как удаленный и исчезнет из списка.
+          </p>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <UButton
+            type="button"
+            color="neutral"
+            variant="soft"
+            @click="isDeleteOpen = false"
+          >
+            Отмена
+          </UButton>
+
+          <UButton
+            type="button"
+            icon="i-lucide-trash"
+            color="error"
+            variant="soft"
+            :loading="deleting"
+            @click="handleDelete"
+          >
+            Удалить
+          </UButton>
+        </div>
+      </div>
+    </template>
+  </UModal>
 </template>

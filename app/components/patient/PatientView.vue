@@ -12,9 +12,10 @@ const patient = defineModel('patient', {
   }),
 })
 
-const { savePatient } = usePatient()
+const { savePatient, deletePatient } = usePatient()
 const router = useRouter()
 const route = useRoute()
+const isDeleteOpen = ref(false)
 
 const genderOptions = [
   { label: 'Мужской', value: 'M' },
@@ -39,6 +40,14 @@ const onSubmit = async (event) => {
       router.push(`/patients/${createdPatient.id}`)
     }
   }
+}
+
+const onDelete = async () => {
+  if (!patient.value.id) return
+
+  await deletePatient(patient.value.id)
+  isDeleteOpen.value = false
+  router.push('/patients')
 }
 
 const emit = defineEmits(['submit'])
@@ -87,11 +96,50 @@ const emit = defineEmits(['submit'])
       </UFormField>
     </div>
 
-    <UButton
-      type="submit"
-      label="Сохранить пациента"
-      icon="i-lucide-save"
-      block
-    />
+    <div class="flex gap-2">
+      <UButton
+        type="submit"
+        label="Сохранить пациента"
+        icon="i-lucide-save"
+        block
+      />
+      <UButton
+        type="button"
+        icon="i-lucide-trash"
+        color="error"
+        variant="soft"
+        @click="isDeleteOpen = true"
+      />
+    </div>
   </UForm>
+
+  <UModal v-model:open="isDeleteOpen">
+    <template #content>
+      <div class="p-6 space-y-4">
+        <div class="space-y-1">
+          <h3 class="text-lg font-semibold">Удалить пациента?</h3>
+          <p class="text-sm text-muted">
+            Пациент будет помечен как удаленный. Все связанные протоколы тоже
+            будут помечены как удаленные.
+          </p>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <UButton color="neutral" variant="soft" @click="isDeleteOpen = false">
+            Отмена
+          </UButton>
+
+          <UButton
+            type="button"
+            icon="i-lucide-trash"
+            color="error"
+            variant="soft"
+            @click="onDelete"
+          >
+            Удалить
+          </UButton>
+        </div>
+      </div>
+    </template>
+  </UModal>
 </template>

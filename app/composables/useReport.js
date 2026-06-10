@@ -32,8 +32,15 @@ export function useReport() {
   }
 
   async function getReports() {
-    const reports = await db.reports.orderBy('createdAt').reverse().toArray()
-    const patients = await db.patients.toArray()
+    const reports = await db.reports
+      .orderBy('createdAt')
+      .reverse()
+      .filter((report) => !report.deleted)
+      .toArray()
+
+    const patients = await db.patients
+      .filter((patient) => !patient.deleted)
+      .toArray()
 
     const patientsMap = Object.fromEntries(
       patients.map((p) => [
@@ -49,7 +56,8 @@ export function useReport() {
   }
 
   async function getReportById(id) {
-    return await db.reports.get(id)
+    const report = await db.reports.get(id)
+    return report && !report.deleted ? report : null
   }
 
   async function getReportByPatientId(patientId) {
@@ -57,6 +65,7 @@ export function useReport() {
       const reports = await db.reports
         .where('patientId')
         .equals(patientId)
+        .filter((report) => !report.deleted)
         .reverse()
         .sortBy('createdAt')
 
@@ -99,11 +108,19 @@ export function useReport() {
     const reports = await db.reports
       .orderBy('createdAt')
       .reverse()
+      .filter((report) => !report.deleted)
       .limit(limit)
       .toArray()
 
     const patientIds = [...new Set(reports.map((r) => r.patientId))]
-    const patients = await db.patients.where('id').anyOf(patientIds).toArray()
+
+    const patients = patientIds.length
+      ? await db.patients
+          .where('id')
+          .anyOf(patientIds)
+          .filter((patient) => !patient.deleted)
+          .toArray()
+      : []
 
     const patientsMap = Object.fromEntries(
       patients.map((p) => [
@@ -118,6 +135,34 @@ export function useReport() {
     }))
   }
 
+  async function deleteReport(id) {
+    try {
+      const updated = await db.reports.update(id, {
+        deleted: true,
+        updatedAt: new Date().toISOString(),
+      })
+
+      if (!updated) {
+        throw new Error('Report not found')
+      }
+
+      toast.add({
+        title: 'Протокол удален',
+        icon: 'i-lucide-trash',
+        color: 'warning',
+      })
+    } catch (error) {
+      toast.add({
+        title: 'Ошибка удаления',
+        description: 'Не удалось удалить протокол',
+        icon: 'i-lucide-circle-alert',
+        color: 'error',
+      })
+
+      throw error
+    }
+  }
+
   return {
     saveReport,
     getReports,
@@ -127,5 +172,6 @@ export function useReport() {
     countToday,
     countThisMonth,
     countTotal,
+    deleteReport,
   }
 }

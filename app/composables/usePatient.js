@@ -64,19 +64,30 @@ export const usePatient = () => {
 
   const deletePatient = async (id) => {
     const patient = await db.patients.get(id)
+    if (!patient) return { reportsUpdated: 0 }
 
-    if (!patient) return
+    const timestamp = new Date().toISOString()
+    let reportsUpdated = 0
 
-    await db.patients.update(id, {
-      deleted: true,
-      updatedAt: new Date().toISOString(),
+    await db.transaction('rw', db.patients, db.reports, async () => {
+      await db.patients.update(id, {
+        deleted: true,
+        updatedAt: timestamp,
+      })
+
+      reportsUpdated = await db.reports.where('patientId').equals(id).modify({
+        deleted: true,
+        updatedAt: timestamp,
+      })
     })
 
     toast.add({
-      title: 'Пациент удален',
+      title: 'Пациент удален. Удалено протоколов: ' + reportsUpdated,
       color: 'warning',
       icon: 'i-lucide-trash',
     })
+
+    return { reportsUpdated }
   }
 
   return {
