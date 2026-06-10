@@ -6,6 +6,7 @@ const { saveFeedback } = useFeedback()
 const router = useRouter()
 const toast = useToast()
 
+const copied = ref(false)
 const loading = ref(false)
 
 const state = reactive({
@@ -43,6 +44,19 @@ async function onSubmit(event) {
     })
   } finally {
     loading.value = false
+  }
+}
+
+const copyEmail = async () => {
+  try {
+    await navigator.clipboard.writeText('admin@thyla.ru')
+    copied.value = true
+
+    setTimeout(() => {
+      copied.value = false
+    }, 5000)
+  } catch (error) {
+    console.error('Ошибка копирования:', error)
   }
 }
 </script>
@@ -89,4 +103,26 @@ async function onSubmit(event) {
       </UButton>
     </div>
   </UForm>
+  <USeparator />
+  <div class="flex items-center gap-4">
+    <UButton
+      to="https://github.com/thylaakari"
+      target="_blank"
+      icon="i-lucide-github"
+      variant="soft"
+      color="neutral"
+      >GitHub</UButton
+    >
+
+    <UButton
+      :icon="copied ? 'i-lucide-check' : 'i-lucide-copy'"
+      variant="soft"
+      color="neutral"
+      @click="copyEmail"
+    >
+      admin@thyla.ru
+    </UButton>
+
+    <span v-if="copied" class="text-sm text-muted">Скопировано!</span>
+  </div>
 </template>

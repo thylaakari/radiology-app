@@ -57,5 +57,9 @@ async function handleImport() {
     >
       Импортировать
     </UButton>
+    <p class="text-xs text-muted">
+      При импорте произойдет вставка данных после новых. Старые записи
+      перезаписаны <strong>НЕ</strong> будут.
+    </p>
   </div>
 </template>
