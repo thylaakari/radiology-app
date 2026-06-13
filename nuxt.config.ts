@@ -31,8 +31,10 @@ export default defineNuxtConfig({
       include: [
         '@internationalized/date',
         '@tanstack/vue-table',
+        '@tauri-apps/api/app',
         '@tauri-apps/api/webviewWindow',
         '@tauri-apps/api/window',
+        '@tauri-apps/plugin-updater',
         '@vue/devtools-core',
         '@vue/devtools-kit',
         'dexie',

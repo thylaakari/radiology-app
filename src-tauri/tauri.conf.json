@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "radiology-hub",
-  "version": "0.1.0",
+  "version": "1.0.2",
   "identifier": "com.thyla.radiology-hub",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -28,10 +28,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "windows": {
-      "digestAlgorithm": "sha256",
-      "timestampUrl": ""
-    },
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -39,5 +36,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IEVGOEIzODMwNzVCMjQ1QUIKUldTclJiSjFNRGlMNzIxNFgxTlo0a3lBQjZ3dXRDLzBIalRIWlkxL054OHM3MVk4c1cyaUJVdUsK",
+      "endpoints": ["https://radiologyhub.ru/updates/latest.json"],
+      "windows": {
+        "installMode": "passive"
+      }
+    }
   }
 }
