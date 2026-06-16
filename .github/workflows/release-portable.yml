@@ -16,8 +16,11 @@ jobs:
       matrix:
         include:
           - os: windows-latest
+            name: windows
           - os: macos-latest
+            name: macos
           - os: ubuntu-22.04
+            name: linux
 
     runs-on: ${{ matrix.os }}
 
@@ -34,8 +37,16 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
+      - name: Setup MSBuild
+        if: matrix.name == 'windows'
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Setup Visual Studio shell
+        if: matrix.name == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
       - name: Install Linux deps
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.name == 'linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y \
@@ -50,38 +61,41 @@ jobs:
         run: npm install
 
       - name: Build Windows portable
-        if: matrix.os == 'windows-latest'
+        if: matrix.name == 'windows'
         shell: powershell
         run: |
           npm run tauri build
           Compress-Archive -Path "src-tauri/target/release/radiology-hub.exe" -DestinationPath "radiology-hub-windows-portable.zip"
 
       - name: Build macOS portable
-        if: matrix.os == 'macos-latest'
+        if: matrix.name == 'macos'
         run: |
           npm run tauri build -- --bundles app
           ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/release/bundle/macos/radiology-hub.app" "radiology-hub-macos-portable.zip"
 
       - name: Build Linux portable
-        if: matrix.os == 'ubuntu-22.04'
+        if: matrix.name == 'linux'
         run: |
           npm run tauri build -- --bundles appimage
           cp src-tauri/target/release/bundle/appimage/*.AppImage ./radiology-hub-linux-portable.AppImage
 
-      - name: Upload Windows release asset
-        if: matrix.os == 'windows-latest'
+      - name: Upload Windows asset
+        if: matrix.name == 'windows'
         uses: softprops/action-gh-release@v2
         with:
           files: radiology-hub-windows-portable.zip
+          tag_name: ${{ github.ref_name }}
 
-      - name: Upload macOS release asset
-        if: matrix.os == 'macos-latest'
+      - name: Upload macOS asset
+        if: matrix.name == 'macos'
         uses: softprops/action-gh-release@v2
         with:
           files: radiology-hub-macos-portable.zip
+          tag_name: ${{ github.ref_name }}
 
-      - name: Upload Linux release asset
-        if: matrix.os == 'ubuntu-22.04'
+      - name: Upload Linux asset
+        if: matrix.name == 'linux'
         uses: softprops/action-gh-release@v2
         with:
           files: radiology-hub-linux-portable.AppImage
+          tag_name: ${{ github.ref_name }}
