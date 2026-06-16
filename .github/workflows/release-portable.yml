@@ -1,0 +1,101 @@
+name: Release Portable
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: radiology-hub-windows-portable
+            bundle_path: src-tauri/target/release/radiology-hub.exe
+          - os: macos-latest
+            artifact_name: radiology-hub-macos-portable
+            bundle_path: src-tauri/target/release/bundle/macos/radiology-hub.app
+          - os: ubuntu-22.04
+            artifact_name: radiology-hub-linux-portable
+            bundle_path: src-tauri/target/release/bundle/appimage/*.AppImage
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux deps
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libgtk-3-dev \
+            libwebkit2gtk-4.1-dev \
+            libappindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libjavascriptcoregtk-4.1-dev
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Windows portable
+        if: matrix.os == 'windows-latest'
+        shell: powershell
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          npm run tauri build
+          Compress-Archive -Path "src-tauri/target/release/radiology-hub.exe" -DestinationPath "radiology-hub-windows-portable.zip"
+
+      - name: Build macOS portable
+        if: matrix.os == 'macos-latest'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          npm run tauri build -- --bundles app
+          ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/release/bundle/macos/radiology-hub.app" "radiology-hub-macos-portable.zip"
+
+      - name: Build Linux portable
+        if: matrix.os == 'ubuntu-22.04'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          npm run tauri build -- --bundles appimage
+          cp src-tauri/target/release/bundle/appimage/*.AppImage ./radiology-hub-linux-portable.AppImage
+
+      - name: Upload Windows release asset
+        if: matrix.os == 'windows-latest'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: radiology-hub-windows-portable.zip
+
+      - name: Upload macOS release asset
+        if: matrix.os == 'macos-latest'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: radiology-hub-macos-portable.zip
+
+      - name: Upload Linux release asset
+        if: matrix.os == 'ubuntu-22.04'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: radiology-hub-linux-portable.AppImage
