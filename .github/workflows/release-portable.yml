@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v*'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -15,14 +16,8 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            artifact_name: radiology-hub-windows-portable
-            bundle_path: src-tauri/target/release/radiology-hub.exe
           - os: macos-latest
-            artifact_name: radiology-hub-macos-portable
-            bundle_path: src-tauri/target/release/bundle/macos/radiology-hub.app
           - os: ubuntu-22.04
-            artifact_name: radiology-hub-linux-portable
-            bundle_path: src-tauri/target/release/bundle/appimage/*.AppImage
 
     runs-on: ${{ matrix.os }}
 
@@ -57,27 +52,18 @@ jobs:
       - name: Build Windows portable
         if: matrix.os == 'windows-latest'
         shell: powershell
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           npm run tauri build
           Compress-Archive -Path "src-tauri/target/release/radiology-hub.exe" -DestinationPath "radiology-hub-windows-portable.zip"
 
       - name: Build macOS portable
         if: matrix.os == 'macos-latest'
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           npm run tauri build -- --bundles app
           ditto -c -k --sequesterRsrc --keepParent "src-tauri/target/release/bundle/macos/radiology-hub.app" "radiology-hub-macos-portable.zip"
 
       - name: Build Linux portable
         if: matrix.os == 'ubuntu-22.04'
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           npm run tauri build -- --bundles appimage
           cp src-tauri/target/release/bundle/appimage/*.AppImage ./radiology-hub-linux-portable.AppImage
