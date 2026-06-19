@@ -7,6 +7,18 @@
     "dialog:allow-open",
     "dialog:allow-save",
     "fs:allow-read-text-file",
-    "fs:allow-write-text-file"
+    "fs:allow-write-text-file",
+    "opener:default",
+    {
+      "identifier": "http:default",
+      "allow": [
+        {
+          "url": "https://www.radiologyhub.ru/updates/latest.json"
+        },
+        {
+          "url": "https://github.com/*"
+        }
+      ]
+    }
   ]
 }

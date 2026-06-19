@@ -1,31 +1,15 @@
 <script setup>
-import { ru } from '@nuxt/ui/locale'
-import { check } from '@tauri-apps/plugin-updater'
-import { getVersion } from '@tauri-apps/api/app'
-
 const { setTitle } = useMetaData()
+const { updateState, checkAppUpdate, openDownloadPage } = useAppUpdate()
 
-const currentVersion = ref('')
-const latestVersion = ref('')
-const updateNotes = ref('')
-const hasUpdate = ref(false)
-const updateError = ref('')
+const showUpdateModal = ref(false)
 
 onMounted(async () => {
   await setTitle('')
+  const result = await checkAppUpdate()
 
-  try {
-    currentVersion.value = await getVersion()
-
-    const update = await check()
-
-    if (update) {
-      hasUpdate.value = true
-      latestVersion.value = update.version
-      updateNotes.value = update.body || update.rawJson?.notes || ''
-    }
-  } catch (error) {
-    updateError.value = error?.message || 'Ошибка проверки обновления'
+  if (result.hasUpdate) {
+    showUpdateModal.value = true
   }
 })
 </script>
@@ -46,14 +30,43 @@ onMounted(async () => {
         border: 1px solid #ddd;
         border-radius: 12px;
         padding: 12px;
-        max-width: 320px;
       "
     >
-      <div>Текущая версия: {{ currentVersion }}</div>
-      <div v-if="hasUpdate">Новая версия: {{ latestVersion }}</div>
-      <div v-if="updateNotes">{{ updateNotes }}</div>
-      <div v-if="!hasUpdate && currentVersion">Обновлений нет</div>
-      <div v-if="updateError" style="color: red">{{ updateError }}</div>
+      <div>Текущая версия: {{ updateState.currentVersion || '...' }}</div>
+      <div v-if="updateState.hasUpdate">
+        Новая версия: {{ updateState.latestVersion }}
+      </div>
+      <div v-if="updateState.notes">
+        {{ updateState.notes }}
+      </div>
+      <div
+        v-if="
+          !updateState.hasUpdate &&
+          updateState.checked &&
+          updateState.currentVersion
+        "
+      >
+        Обновлений нет
+      </div>
+      <div v-if="updateState.error" style="color: red">
+        {{ updateState.error }}
+      </div>
+
+      <button
+        v-if="updateState.hasUpdate && updateState.downloadUrl"
+        @click="openDownloadPage"
+        style="
+          margin-top: 12px;
+          padding: 8px 12px;
+          border-radius: 8px;
+          border: none;
+          background: #111827;
+          color: white;
+          cursor: pointer;
+        "
+      >
+        Скачать обновление
+      </button>
     </div>
   </UApp>
 </template>
