@@ -1,16 +1,23 @@
 <script setup>
 const toast = useToast()
 const { exportDb, exporting, importDb, importing } = useDbExport()
+const { markBackupDone, checkBackupReminder } = useBackupReminder()
 
 async function handleExport() {
   await exportDb()
-  toast.add({ title: 'База данных экспортирована', icon: 'i-lucide-check' })
+  await markBackupDone()
+
+  toast.add({
+    title: 'База данных экспортирована',
+    icon: 'i-lucide-check',
+  })
 }
 
 async function handleImport() {
   try {
     const result = await importDb()
     if (!result) return
+
     toast.add({
       title: 'Импорт завершён',
       description: `Пациентов: ${result.patients}, протоколов: ${result.reports}, шаблонов: ${result.templates}`,
@@ -25,6 +32,10 @@ async function handleImport() {
     })
   }
 }
+
+onMounted(async () => {
+  await checkBackupReminder()
+})
 </script>
 
 <template>
