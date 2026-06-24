@@ -35,5 +35,13 @@
     "@tauri-apps/cli": "^2.11.2",
     "@types/uuid": "^10.0.0",
     "supabase": "^2.107.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "better-sqlite3",
+      "esbuild",
+      "vue-demi"
+    ]
   }
 }
