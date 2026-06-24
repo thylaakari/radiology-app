@@ -1,4 +1,6 @@
 <script setup>
+import { ru } from '@nuxt/ui/locale'
+
 const { setTitle } = useMetaData()
 const { updateState, checkAppUpdate, openDownloadPage } = useAppUpdate()
 

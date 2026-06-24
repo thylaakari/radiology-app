@@ -34,6 +34,8 @@ export default defineNuxtConfig({
         '@tauri-apps/api/app',
         '@tauri-apps/api/webviewWindow',
         '@tauri-apps/api/window',
+        '@tauri-apps/plugin-http',
+        '@tauri-apps/plugin-opener',
         '@tauri-apps/plugin-updater',
         '@vue/devtools-core',
         '@vue/devtools-kit',
