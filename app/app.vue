@@ -1,8 +1,12 @@
 <script setup>
 import { ru } from '@nuxt/ui/locale'
 
-const { setTitle } = useMetaData()
+const { title, setTitle } = useMetaData()
 const { updateState, checkAppUpdate, openDownloadPage } = useAppUpdate()
+
+useHead({
+  title: computed(() => (title.value ? `${title.value}` : 'Radiology App')),
+})
 
 const showUpdateModal = ref(false)
 

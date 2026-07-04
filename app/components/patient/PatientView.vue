@@ -22,6 +22,9 @@ const genderOptions = [
   { label: 'Женский', value: 'F' },
   { label: 'Не указан', value: 'U' },
 ]
+const setGender = (value) => {
+  patient.value = { ...patient.value, gender: value }
+}
 
 onMounted(() => {
   if (route.params.id) {
@@ -92,7 +95,12 @@ const emit = defineEmits(['submit'])
       </UFormField>
 
       <UFormField label="Пол" name="gender">
-        <USelect v-model="patient.gender" :items="genderOptions" class="w-32" />
+        <USelect
+          v-model="patient.gender"
+          :items="genderOptions"
+          class="w-32"
+          @update:model-value="setGender"
+        />
       </UFormField>
     </div>
 
