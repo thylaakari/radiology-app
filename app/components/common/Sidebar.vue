@@ -29,6 +29,11 @@ const items = [
   ],
   [
     {
+      label: 'Обновления',
+      to: '/updates',
+      icon: 'i-lucide-repeat-2',
+    },
+    {
       label: 'Обратная связь',
       to: '/feedback/create', //временно
       icon: 'i-lucide-message-circle',
