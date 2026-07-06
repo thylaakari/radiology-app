@@ -13,6 +13,9 @@ const copied = ref(false)
 const isDeleteOpen = ref(false)
 let copyTimer = null
 
+const saveLabel = ref('Сохранить')
+let saveTimer = null
+
 const localReport = ref(
   props.report ?? {
     id: '',
@@ -37,12 +40,25 @@ watch(
 
 async function handleSave() {
   try {
+    clearTimeout(saveTimer)
     saving.value = true
+    saveLabel.value = 'Сохранение...'
+
     const savedReport = await saveReport({
       ...localReport.value,
       patientId: props.patient.id,
     })
+
+    saveLabel.value = 'Сохранено'
+
+    saveTimer = setTimeout(() => {
+      saveLabel.value = 'Сохранить'
+    }, 5000)
+
     router.push(`/reports/${savedReport.id}`)
+  } catch (error) {
+    saveLabel.value = 'Сохранить'
+    throw error
   } finally {
     saving.value = false
   }
@@ -101,6 +117,7 @@ watch(selectedTemplate, (template) => {
 
 onBeforeUnmount(() => {
   clearTimeout(copyTimer)
+  clearTimeout(saveTimer)
 })
 </script>
 
@@ -139,7 +156,7 @@ onBeforeUnmount(() => {
 
     <div class="flex gap-2">
       <UButton
-        label="Сохранить"
+        :label="saveLabel"
         icon="i-lucide-save"
         block
         :loading="saving"

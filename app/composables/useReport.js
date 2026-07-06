@@ -13,11 +13,6 @@ export function useReport() {
         updatedAt: timestamp,
       }
       await db.reports.put(reportData)
-      toast.add({
-        title: reportData.id ? 'Протокол обновлен' : 'Протокол сохранен',
-        icon: 'i-lucide-check',
-        color: 'success',
-      })
       return reportData
     } catch (error) {
       toast.add({
