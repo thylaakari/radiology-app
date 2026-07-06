@@ -1,5 +1,11 @@
 <script setup>
-const items = [
+const { updateState, checkAppUpdate } = useAppUpdate()
+
+onMounted(() => {
+  checkAppUpdate()
+})
+
+const items = computed(() => [
   [
     {
       label: 'Главная',
@@ -31,7 +37,8 @@ const items = [
     {
       label: 'Обновления',
       to: '/updates',
-      icon: 'i-lucide-repeat-2',
+      icon: updateState.hasUpdate ? 'i-lucide-download' : 'i-lucide-repeat-2',
+      badge: updateState.hasUpdate ? 'NEW' : undefined,
     },
     {
       label: 'Обратная связь',
@@ -54,7 +61,7 @@ const items = [
       icon: 'i-lucide-info',
     },
   ],
-]
+])
 </script>
 
 <template>
