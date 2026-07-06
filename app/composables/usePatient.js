@@ -19,8 +19,15 @@ export const usePatient = () => {
     const fInitial = data.firstName?.[0]?.toUpperCase() || ''
     const mInitial = data.middleName?.[0]?.toUpperCase() || ''
 
-    const patient = {
+    const normalizedData = {
       ...data,
+      lastName: normalizeName(data.lastName),
+      firstName: normalizeName(data.firstName),
+      middleName: normalizeName(data.middleName),
+    }
+
+    const patient = {
+      ...normalizedData,
       id: data.id || crypto.randomUUID(),
       shortName: `${lInitial}${fInitial}${mInitial}`,
       birthDate: data.birthDate?.toString(),
@@ -28,7 +35,7 @@ export const usePatient = () => {
       updatedAt: timestamp,
       deleted: false,
     }
-
+    console.log(data)
     await db.patients.put(patient)
 
     toast.add({
