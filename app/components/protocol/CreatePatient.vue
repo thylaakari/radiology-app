@@ -12,7 +12,7 @@ const total = ref(0)
 const data = ref([])
 const columns = [
   {
-    accessorKey: 'shortName',
+    accessorKey: 'fullName',
     header: 'ФИО',
   },
   {
